@@ -1,0 +1,30 @@
+name: Power BI CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # runs when you push to main branch
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Power BI CLI
+        run: npm install -g powerbi-cli
+
+      - name: Login to Power BI Service
+        run: |
+          pbicli login --service-principal \
+            --client-id ${{ secrets.PBI_CLIENT_ID }} \
+            --client-secret ${{ secrets.PBI_CLIENT_SECRET }} \
+            --tenant ${{ secrets.PBI_TENANT_ID }}
+
+      - name: Deploy report to Power BI workspace
+        run: |
+          pbicli import report \
+            --path "./SalesReport.pbix" \
+            --workspace "Dev Workspace"
